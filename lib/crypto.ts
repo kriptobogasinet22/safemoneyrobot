@@ -10,33 +10,60 @@ const COIN_IDS: Record<string, string> = {
   doge: "dogecoin",
 }
 
+// Fiyat önbelleği
+const priceCache: Record<string, { price: number; timestamp: number }> = {}
+const CACHE_DURATION = 60000 // 60 saniye (milisaniye cinsinden)
+
 export async function getCoinPrices(coins: string[]): Promise<Record<string, number>> {
   try {
-    const coinIds = coins
-      .map((coin) => COIN_IDS[coin.toLowerCase()])
-      .filter(Boolean)
-      .join(",")
-    const response = await fetch(
-      `${COINGECKO_API_URL}/simple/price?ids=${coinIds}&vs_currencies=try`,
-      { next: { revalidate: 60 } }, // 60 saniyede bir yenile
-    )
+    const now = Date.now()
+    const pricesToFetch: string[] = []
+    const result: Record<string, number> = {}
 
-    if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`)
-    }
+    // Önbellekte olmayan veya süresi dolmuş fiyatları belirle
+    for (const coin of coins) {
+      const coinLower = coin.toLowerCase()
+      const cached = priceCache[coinLower]
 
-    const data = await response.json()
-    const prices: Record<string, number> = {}
-
-    // API yanıtını işle
-    for (const [coinId, priceData] of Object.entries(data)) {
-      const coin = Object.keys(COIN_IDS).find((key) => COIN_IDS[key] === coinId)
-      if (coin && priceData.try) {
-        prices[coin] = priceData.try
+      if (cached && now - cached.timestamp < CACHE_DURATION) {
+        result[coinLower] = cached.price
+      } else {
+        pricesToFetch.push(coin)
       }
     }
 
-    return prices
+    // Eğer çekilecek fiyat varsa API'ye istek yap
+    if (pricesToFetch.length > 0) {
+      const coinIds = pricesToFetch
+        .map((coin) => COIN_IDS[coin.toLowerCase()])
+        .filter(Boolean)
+        .join(",")
+
+      const response = await fetch(
+        `${COINGECKO_API_URL}/simple/price?ids=${coinIds}&vs_currencies=try`,
+        { next: { revalidate: 60 } }, // 60 saniyede bir yenile
+      )
+
+      if (!response.ok) {
+        throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
+      // API yanıtını işle ve önbelleğe al
+      for (const [coinId, priceData] of Object.entries(data)) {
+        const coin = Object.keys(COIN_IDS).find((key) => COIN_IDS[key] === coinId)
+        if (coin && priceData.try) {
+          result[coin] = priceData.try
+          priceCache[coin] = {
+            price: priceData.try,
+            timestamp: now,
+          }
+        }
+      }
+    }
+
+    return result
   } catch (error) {
     console.error("Error fetching coin prices:", error)
     throw error
