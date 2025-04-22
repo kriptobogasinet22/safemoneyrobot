@@ -46,7 +46,7 @@ async function handleMessage(message: TelegramMessage) {
       // Durumu temizle
       delete userStates[chatId]
     } else {
-      await sendMessage(chatId, "Geçersiz miktar. Lütfen sayısal bir değer girin.")
+      await sendMessage(chatId, "⚠️ Geçersiz miktar. Lütfen sayısal bir değer girin.")
     }
     return
   }
@@ -63,12 +63,12 @@ async function handleMessage(message: TelegramMessage) {
         if (!isNaN(amount)) {
           await handleConversion(chatId, amount, fromCurrency, toCurrency, isGroup, userId, username)
         } else {
-          await sendMessage(chatId, "Geçersiz miktar. Lütfen sayısal bir değer girin.")
+          await sendMessage(chatId, "⚠️ Geçersiz miktar. Lütfen sayısal bir değer girin.")
         }
       } else {
         await sendMessage(
           chatId,
-          "Doğru format: /convert [miktar] [kaynak para birimi] [hedef para birimi]\nÖrnek: /convert 100 TRY BTC",
+          "ℹ️ *Doğru Format:*\n`/convert [miktar] [kaynak para birimi] [hedef para birimi]`\n\n*Örnek:* `/convert 100 TRY BTC`",
         )
       }
     }
@@ -89,12 +89,12 @@ async function handleMessage(message: TelegramMessage) {
       if (!isNaN(amount)) {
         await handleConversion(chatId, amount, fromCurrency, toCurrency, isGroup, userId, username)
       } else {
-        await sendMessage(chatId, "Geçersiz miktar. Lütfen sayısal bir değer girin.")
+        await sendMessage(chatId, "⚠️ Geçersiz miktar. Lütfen sayısal bir değer girin.")
       }
     } else {
       await sendMessage(
         chatId,
-        "Doğru format: /convert [miktar] [kaynak para birimi] [hedef para birimi]\nÖrnek: /convert 100 TRY BTC",
+        "ℹ️ *Doğru Format:*\n`/convert [miktar] [kaynak para birimi] [hedef para birimi]`\n\n*Örnek:* `/convert 100 TRY BTC`",
       )
     }
   }
@@ -125,7 +125,14 @@ async function handleCallbackQuery(callbackQuery: any) {
           toCurrency: "TRY",
         },
       }
-      await sendMessage(chatId, `Lütfen TL'ye dönüştürmek istediğiniz ${coin} miktarını girin:`)
+      await sendMessage(
+        chatId,
+        `💱 *Dönüşüm İşlemi* 💱\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+          `Lütfen TL'ye dönüştürmek istediğiniz *${coin}* miktarını girin:\n\n` +
+          `💡 *İpucu:* Dönüşüm sonucunda farklı yüzdelik değerler de gösterilecektir.\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━━`,
+      )
     } else {
       // Gruplarda komut kullanımını anlat
       await sendConversionPrompt(chatId, coin, "TRY")
@@ -142,7 +149,14 @@ async function handleCallbackQuery(callbackQuery: any) {
           toCurrency: coin,
         },
       }
-      await sendMessage(chatId, `Lütfen ${coin}'a dönüştürmek istediğiniz TL miktarını girin:`)
+      await sendMessage(
+        chatId,
+        `💱 *Dönüşüm İşlemi* 💱\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+          `Lütfen *${coin}*'a dönüştürmek istediğiniz TL miktarını girin:\n\n` +
+          `💡 *İpucu:* Dönüşüm sonucunda farklı yüzdelik değerler de gösterilecektir.\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━━`,
+      )
     } else {
       // Gruplarda komut kullanımını anlat
       await sendConversionPrompt(chatId, "TRY", coin)
@@ -163,7 +177,12 @@ async function handleCallbackQuery(callbackQuery: any) {
 async function sendConversionPrompt(chatId: number | string, fromCurrency: string, toCurrency: string) {
   await sendMessage(
     chatId,
-    `Lütfen dönüştürmek istediğiniz ${fromCurrency} miktarını girin.\n\nÖrnek: /convert 100 ${fromCurrency} ${toCurrency}`,
+    `🔄 *Dönüşüm İşlemi* 🔄\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `Lütfen dönüştürmek istediğiniz *${fromCurrency}* miktarını girin.\n\n` +
+      `*Örnek:* /convert 100 ${fromCurrency} ${toCurrency}\n\n` +
+      `💡 *İpucu:* Dönüşüm sonucunda farklı yüzdelik değerler de gösterilecektir.\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━`,
   )
 }
 
@@ -177,7 +196,13 @@ async function sendMainMenu(chatId: number | string) {
 
   await sendMessage(
     chatId,
-    "🤖 *NikelChangeOfis*\n\nMerhaba! Kripto para fiyatlarını görmek veya dönüşüm yapmak için aşağıdaki menüyü kullanabilirsiniz.",
+    "🤖 *NIKEL CHANGE OFIS* 🤖\n\n" +
+      "━━━━━━━━━━━━━━━━━━━━━\n\n" +
+      "Merhaba! Kripto para fiyatlarını görmek veya dönüşüm yapmak için aşağıdaki menüyü kullanabilirsiniz.\n\n" +
+      "💼 *Hızlı ve güvenilir kripto işlemleri*\n" +
+      "📊 *Anlık fiyat güncellemeleri*\n" +
+      "🔄 *Kolay para birimi dönüşümleri*\n\n" +
+      "━━━━━━━━━━━━━━━━━━━━━",
     keyboard,
   )
 }
@@ -186,17 +211,28 @@ async function sendCryptoPrices(chatId: number | string) {
   try {
     const prices = await getCoinPrices(SUPPORTED_COINS)
 
-    let message = "💰 *Güncel Kripto Para Fiyatları (TL)*\n\n"
+    let message = "💰 *Güncel Kripto Para Fiyatları* 💰\n\n"
+    message += "━━━━━━━━━━━━━━━━━━━━━\n\n"
+
+    const coinEmojis: Record<string, string> = {
+      BTC: "₿",
+      USDT: "💵",
+      TRX: "⚡",
+      XMR: "🔒",
+      DOGE: "🐶",
+    }
 
     for (const coin of SUPPORTED_COINS) {
       const price = prices[coin.toLowerCase()]
       if (price) {
-        message += `*${coin}*: ${price.toLocaleString("tr-TR")} ₺\n`
+        const emoji = coinEmojis[coin] || "🪙"
+        message += `${emoji} *${coin}*: ${price.toLocaleString("tr-TR")} ₺\n`
       }
     }
 
     message +=
-      "\n_Son güncelleme: " +
+      "\n━━━━━━━━━━━━━━━━━━━━━\n\n" +
+      "_Son güncelleme: " +
       new Intl.DateTimeFormat("tr-TR", {
         timeZone: "Europe/Istanbul",
         day: "2-digit",
@@ -219,7 +255,7 @@ async function sendCryptoPrices(chatId: number | string) {
     await sendMessage(chatId, message, keyboard)
   } catch (error) {
     console.error("Error fetching prices:", error)
-    await sendMessage(chatId, "Fiyatlar alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
+    await sendMessage(chatId, "⚠️ Fiyatlar alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
   }
 }
 
@@ -227,33 +263,41 @@ async function sendConversionMenu(chatId: number | string) {
   const keyboard: InlineKeyboardMarkup = {
     inline_keyboard: [
       [
-        { text: "TRY → BTC", callback_data: "convert_from_try_BTC" },
-        { text: "BTC → TRY", callback_data: "convert_to_try_BTC" },
+        { text: "💵 TRY → ₿ BTC", callback_data: "convert_from_try_BTC" },
+        { text: "₿ BTC → 💵 TRY", callback_data: "convert_to_try_BTC" },
       ],
       [
-        { text: "TRY → USDT", callback_data: "convert_from_try_USDT" },
-        { text: "USDT → TRY", callback_data: "convert_to_try_USDT" },
+        { text: "💵 TRY → 💵 USDT", callback_data: "convert_from_try_USDT" },
+        { text: "💵 USDT → 💵 TRY", callback_data: "convert_to_try_USDT" },
       ],
       [
-        { text: "TRY → TRX", callback_data: "convert_from_try_TRX" },
-        { text: "TRX → TRY", callback_data: "convert_to_try_TRX" },
+        { text: "💵 TRY → ⚡ TRX", callback_data: "convert_from_try_TRX" },
+        { text: "⚡ TRX → 💵 TRY", callback_data: "convert_to_try_TRX" },
       ],
       [
-        { text: "TRY → XMR", callback_data: "convert_from_try_XMR" },
-        { text: "XMR → TRY", callback_data: "convert_to_try_XMR" },
+        { text: "💵 TRY → 🔒 XMR", callback_data: "convert_from_try_XMR" },
+        { text: "🔒 XMR → 💵 TRY", callback_data: "convert_to_try_XMR" },
       ],
       [
-        { text: "TRY → DOGE", callback_data: "convert_from_try_DOGE" },
-        { text: "DOGE → TRY", callback_data: "convert_to_try_DOGE" },
+        { text: "💵 TRY → 🐶 DOGE", callback_data: "convert_from_try_DOGE" },
+        { text: "🐶 DOGE → 💵 TRY", callback_data: "convert_to_try_DOGE" },
       ],
       [{ text: "⬅️ Ana Menü", callback_data: "main_menu" }],
     ],
   }
 
-  await sendMessage(chatId, "🔄 *Para Çevirici*\n\nLütfen yapmak istediğiniz dönüşüm işlemini seçin:", keyboard)
+  await sendMessage(
+    chatId,
+    "🔄 *Para Çevirici* 🔄\n\n" +
+      "━━━━━━━━━━━━━━━━━━━━━\n\n" +
+      "Lütfen yapmak istediğiniz dönüşüm işlemini seçin:\n\n" +
+      "💡 *İpucu:* Özel yüzdelik dönüşümler için bir miktar girin.\n\n" +
+      "━━━━━━━━━━━━━━━━━━━━━",
+    keyboard,
+  )
 }
 
-// handleConversion fonksiyonunu güncelleyelim - dönüşümleri kaydet
+// handleConversion fonksiyonunu güncelleyelim - dönüşümleri kaydet ve görsel olarak zenginleştir
 async function handleConversion(
   chatId: number | string,
   amount: number,
@@ -266,10 +310,29 @@ async function handleConversion(
   try {
     let result: number
     let message: string
+    const coinEmojis: Record<string, string> = {
+      BTC: "₿",
+      USDT: "💵",
+      TRX: "⚡",
+      XMR: "🔒",
+      DOGE: "🐶",
+      TRY: "₺",
+    }
+
+    const fromEmoji = coinEmojis[fromCurrency] || "🪙"
+    const toEmoji = coinEmojis[toCurrency] || "🪙"
 
     if (fromCurrency === "TRY" && SUPPORTED_COINS.includes(toCurrency)) {
       result = await convertTRYToCrypto(amount, toCurrency)
-      message = `💱 *Dönüşüm Sonucu*\n\n${amount.toLocaleString("tr-TR")} ₺ = ${result.toLocaleString("tr-TR", { maximumFractionDigits: 8 })} ${toCurrency}`
+      message =
+        `💱 *Dönüşüm Sonucu* 💱\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `${fromEmoji} *${amount.toLocaleString("tr-TR")} ${fromCurrency}* = ${toEmoji} *${result.toLocaleString(
+          "tr-TR",
+          {
+            maximumFractionDigits: 8,
+          },
+        )} ${toCurrency}*`
 
       // Yüzdelik dönüşümleri ekle
       if (!isGroup) {
@@ -277,14 +340,20 @@ async function handleConversion(
       }
     } else if (SUPPORTED_COINS.includes(fromCurrency) && toCurrency === "TRY") {
       result = await convertCryptoToTRY(amount, fromCurrency)
-      message = `💱 *Dönüşüm Sonucu*\n\n${amount.toLocaleString("tr-TR", { maximumFractionDigits: 8 })} ${fromCurrency} = ${result.toLocaleString("tr-TR")} ₺`
+      message =
+        `💱 *Dönüşüm Sonucu* 💱\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `${fromEmoji} *${amount.toLocaleString("tr-TR", {
+          maximumFractionDigits: 8,
+        })} ${fromCurrency}* = ${toEmoji} *${result.toLocaleString("tr-TR")} ${toCurrency}*`
 
       // Yüzdelik dönüşümleri ekle
       if (!isGroup) {
         message += await generatePercentageConversions(amount, fromCurrency, toCurrency)
       }
     } else {
-      message = "Desteklenmeyen para birimi. Lütfen TRY ve desteklenen kripto paralar arasında dönüşüm yapın."
+      message =
+        "⚠️ *Desteklenmeyen Para Birimi*\n\n" + "Lütfen TRY ve desteklenen kripto paralar arasında dönüşüm yapın."
       return await sendMessage(chatId, message)
     }
 
@@ -313,18 +382,44 @@ async function handleConversion(
     }
   } catch (error) {
     console.error("Error converting currency:", error)
-    await sendMessage(chatId, "Dönüşüm yapılırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
+    await sendMessage(chatId, "⚠️ Dönüşüm yapılırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
   }
 }
 
-// Yüzdelik dönüşümleri hesaplayan yeni fonksiyon
+// Yüzdelik dönüşümleri hesaplayan ve görsel olarak zenginleştiren fonksiyon
 async function generatePercentageConversions(
   amount: number,
   fromCurrency: string,
   toCurrency: string,
 ): Promise<string> {
   try {
-    let message = "\n\n"
+    let message = "\n\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+
+    // Yüzdelik değerler için emojiler
+    const percentEmojis: Record<number, string> = {
+      10: "🔟",
+      15: "1️⃣5️⃣",
+      20: "2️⃣0️⃣",
+      25: "2️⃣5️⃣",
+      30: "3️⃣0️⃣",
+      35: "3️⃣5️⃣",
+      40: "4️⃣0️⃣",
+      45: "4️⃣5️⃣",
+      50: "5️⃣0️⃣",
+    }
+
+    const coinEmojis: Record<string, string> = {
+      BTC: "₿",
+      USDT: "💵",
+      TRX: "⚡",
+      XMR: "🔒",
+      DOGE: "🐶",
+      TRY: "₺",
+    }
+
+    const fromEmoji = coinEmojis[fromCurrency] || "🪙"
+    const toEmoji = coinEmojis[toCurrency] || "🪙"
+
     const percentages = [10, 15, 20, 25, 30, 35, 40, 45, 50]
 
     for (const percentage of percentages) {
@@ -333,17 +428,18 @@ async function generatePercentageConversions(
 
       if (fromCurrency === "TRY" && SUPPORTED_COINS.includes(toCurrency)) {
         convertedAmount = await convertTRYToCrypto(reducedAmount, toCurrency)
-        message += `%${percentage} TRY: ${reducedAmount.toLocaleString("tr-TR")}, ${toCurrency}: ${convertedAmount.toLocaleString("tr-TR", { maximumFractionDigits: 8 })}\n`
+        message += `${percentEmojis[percentage]} *%${percentage}* ${fromEmoji} ${reducedAmount.toLocaleString("tr-TR")} ➡️ ${toEmoji} ${convertedAmount.toLocaleString("tr-TR", { maximumFractionDigits: 8 })}\n`
       } else if (SUPPORTED_COINS.includes(fromCurrency) && toCurrency === "TRY") {
         convertedAmount = await convertCryptoToTRY(reducedAmount, fromCurrency)
-        message += `%${percentage} ${fromCurrency}: ${reducedAmount.toLocaleString("tr-TR", { maximumFractionDigits: 8 })}, TRY: ${convertedAmount.toLocaleString("tr-TR")}\n`
+        message += `${percentEmojis[percentage]} *%${percentage}* ${fromEmoji} ${reducedAmount.toLocaleString("tr-TR", { maximumFractionDigits: 8 })} ➡️ ${toEmoji} ${convertedAmount.toLocaleString("tr-TR")}\n`
       }
     }
 
+    message += "\n━━━━━━━━━━━━━━━━━━━━━"
     return message
   } catch (error) {
     console.error("Error generating percentage conversions:", error)
-    return ""
+    return "\n\n⚠️ Yüzdelik dönüşümler hesaplanırken bir hata oluştu."
   }
 }
 
