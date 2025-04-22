@@ -30,7 +30,7 @@ export default function AdminLogin() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="p-8 bg-white rounded-lg shadow-md w-96">
-        <h1 className="mb-6 text-2xl font-bold text-center">SafeMoneyRobot Admin</h1>
+        <h1 className="mb-6 text-2xl font-bold text-center">NikelBaba Change Ofis Admin</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700">
