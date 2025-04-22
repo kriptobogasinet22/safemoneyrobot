@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold mb-8">SafeMoneyRobot</h1>
+      <h1 className="text-4xl font-bold mb-8">NikelChangeBot</h1>
       <p className="text-xl mb-4">Telegram Kripto Para Botu</p>
       <p className="text-lg mb-8">Bu bot, kripto para fiyatlarını gösterir ve dönüşüm yapar.</p>
 
