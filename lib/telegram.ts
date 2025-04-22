@@ -177,7 +177,7 @@ async function sendMainMenu(chatId: number | string) {
 
   await sendMessage(
     chatId,
-    "🤖 *NikelChangeOfis*\n\nMerhaba! Kripto para fiyatlarını görmek veya dönüşüm yapmak için aşağıdaki menüyü kullanabilirsiniz.",
+    "🤖 *SafeMoneyRobot*\n\nMerhaba! Kripto para fiyatlarını görmek veya dönüşüm yapmak için aşağıdaki menüyü kullanabilirsiniz.",
     keyboard,
   )
 }
@@ -270,9 +270,19 @@ async function handleConversion(
     if (fromCurrency === "TRY" && SUPPORTED_COINS.includes(toCurrency)) {
       result = await convertTRYToCrypto(amount, toCurrency)
       message = `💱 *Dönüşüm Sonucu*\n\n${amount.toLocaleString("tr-TR")} ₺ = ${result.toLocaleString("tr-TR", { maximumFractionDigits: 8 })} ${toCurrency}`
+
+      // Yüzdelik dönüşümleri ekle
+      if (!isGroup) {
+        message += await generatePercentageConversions(amount, fromCurrency, toCurrency)
+      }
     } else if (SUPPORTED_COINS.includes(fromCurrency) && toCurrency === "TRY") {
       result = await convertCryptoToTRY(amount, fromCurrency)
       message = `💱 *Dönüşüm Sonucu*\n\n${amount.toLocaleString("tr-TR", { maximumFractionDigits: 8 })} ${fromCurrency} = ${result.toLocaleString("tr-TR")} ₺`
+
+      // Yüzdelik dönüşümleri ekle
+      if (!isGroup) {
+        message += await generatePercentageConversions(amount, fromCurrency, toCurrency)
+      }
     } else {
       message = "Desteklenmeyen para birimi. Lütfen TRY ve desteklenen kripto paralar arasında dönüşüm yapın."
       return await sendMessage(chatId, message)
@@ -304,6 +314,36 @@ async function handleConversion(
   } catch (error) {
     console.error("Error converting currency:", error)
     await sendMessage(chatId, "Dönüşüm yapılırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
+  }
+}
+
+// Yüzdelik dönüşümleri hesaplayan yeni fonksiyon
+async function generatePercentageConversions(
+  amount: number,
+  fromCurrency: string,
+  toCurrency: string,
+): Promise<string> {
+  try {
+    let message = "\n\n"
+    const percentages = [10, 15, 20, 25, 30, 35, 40, 45, 50]
+
+    for (const percentage of percentages) {
+      const reducedAmount = amount * (1 - percentage / 100)
+      let convertedAmount: number
+
+      if (fromCurrency === "TRY" && SUPPORTED_COINS.includes(toCurrency)) {
+        convertedAmount = await convertTRYToCrypto(reducedAmount, toCurrency)
+        message += `%${percentage} TRY: ${reducedAmount.toLocaleString("tr-TR")}, ${toCurrency}: ${convertedAmount.toLocaleString("tr-TR", { maximumFractionDigits: 8 })}\n`
+      } else if (SUPPORTED_COINS.includes(fromCurrency) && toCurrency === "TRY") {
+        convertedAmount = await convertCryptoToTRY(reducedAmount, fromCurrency)
+        message += `%${percentage} ${fromCurrency}: ${reducedAmount.toLocaleString("tr-TR", { maximumFractionDigits: 8 })}, TRY: ${convertedAmount.toLocaleString("tr-TR")}\n`
+      }
+    }
+
+    return message
+  } catch (error) {
+    console.error("Error generating percentage conversions:", error)
+    return ""
   }
 }
 
